@@ -83,6 +83,7 @@ if __name__ == '__main__':
 
     onpremise_teams = sentry_onpremise.get_teams()
     cloud_teams = sentry_cloud.get_teams()
+    cloud_org_projects = sentry_cloud.get_project_slugs()
 
     onpremise_projects = get_team_projects(onpremise_teams)
     cloud_projects = get_team_projects(cloud_teams)
@@ -99,5 +100,8 @@ if __name__ == '__main__':
     for team in common_teams:
         missing_projects = onpremise_projects[team] - cloud_projects[team]
         for project in missing_projects:
-            print(f'Granting team {team} missing access to project {project}: ')
-            sentry_cloud.give_team_access_to_project(team, project)
+            if project not in cloud_org_projects:
+                print(f'Project {project} does not exist in cloud')
+            else:
+                print(f'Granting team {team} missing access to project {project}: ')
+                response = sentry_cloud.give_team_access_to_project(team, project)
